@@ -1,44 +1,60 @@
 package com.hxh.lifecycledemo;
 
+import android.annotation.SuppressLint;
 import android.arch.lifecycle.GenericLifecycleObserver;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 
 import java.util.Random;
 
 /**
- * {@link android.support.v4.app.SupportActivity}'s lifecycle
+ * Created by HXH at 2019/10/18
+ * {@link Fragment}'s lifecycle
  */
-public class MainActivity extends AppCompatActivity {
+public class MainFragment extends Fragment {
+
+    public static MainFragment newInstance() {
+        Bundle args = new Bundle();
+        MainFragment fragment = new MainFragment();
+        fragment.setArguments(args);
+        return fragment;
+    }
 
     private static final String TAG = "HXH";
     private Callback mCallback1;
     private Callback mCallback2;
 
+    @SuppressLint("InflateParams")
+    @Nullable
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.fragment_main, null);
+    }
 
-        getSupportFragmentManager().beginTransaction()
-                .add(R.id.fl, MainFragment.newInstance())
-                .commit();
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
 
         getLifecycle().addObserver((GenericLifecycleObserver) (source, event) -> {
-            Log.i(TAG, "onStateChanged: " + source.getClass().getName());
-            Log.i(TAG, "onStateChanged: " + event.name());
+            Log.i(TAG, "fragment --> onStateChanged: " + source.getClass().getName());
+            Log.i(TAG, "fragment --> onStateChanged: " + event.name());
         });
 
         mCallback1 = new DestroyCallback() {
             @Override
             protected void onSuccess0(String result) {
-                Log.i(TAG, "onSuccess0: " + result);
+                Log.i(TAG, "fragment --> onSuccess0: " + result);
             }
 
             @Override
             protected void onFailure0(String error) {
-                Log.i(TAG, "onFailure0: " + error);
+                Log.i(TAG, "fragment --> onFailure0: " + error);
             }
         };
         getLifecycle().addObserver(mCallback1);
@@ -46,13 +62,13 @@ public class MainActivity extends AppCompatActivity {
         mCallback2 = new SimpleCallback() {
             @Override
             public void onSuccess(String result) {
-                Log.i(TAG, "onSuccess: " + result);
+                Log.i(TAG, "fragment --> onSuccess: " + result);
 
             }
 
             @Override
             public void onFailure(String error) {
-                Log.i(TAG, "onFailure: " + error);
+                Log.i(TAG, "fragment --> onFailure: " + error);
             }
         };
 
@@ -77,9 +93,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onDestroy() {
+    public void onDestroy() {
         getLifecycle().removeObserver(mCallback1);
         super.onDestroy();
     }
-
 }
